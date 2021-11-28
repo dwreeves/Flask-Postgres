@@ -44,7 +44,7 @@ doc = [
     "pygments"
 ]
 
-[options.entry_points."flask.commands"]
+[tool.flit.entrypoints."flask.commands"]
 psql = "flask_postgres.cli:cli"
 
 [tool.pytest.ini_options]
