@@ -99,7 +99,7 @@ def raise_err_if_disallowed():
 
 def database_exists(
         database_name: str,
-        conn: psycopg.connection.Connection
+        conn: "psycopg.Connection"
 ) -> bool:
     cursor = conn.cursor()
 

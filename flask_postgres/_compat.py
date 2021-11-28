@@ -13,11 +13,14 @@ _MODULE_NOT_FOUND_MSG = (
 
 try:
     import psycopg as psycopg
+    import psycopg.errors as errors
 except ModuleNotFoundError:
     try:
         import psycopg2 as psycopg
+        import psycopg2.errors as errors
     except ModuleNotFoundError:
         psycopg = None
+        errors = None
 
 
 def check_dependencies():

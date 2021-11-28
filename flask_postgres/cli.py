@@ -12,6 +12,7 @@ from flask.cli import with_appcontext
 from . import config
 from ._compat import check_dependencies
 from ._compat import psycopg
+from ._compat import errors
 from .utils import extract_db_name
 from .utils import get_admin_uri
 from .utils import get_db
@@ -24,22 +25,15 @@ from .utils import database_exists
 FC = t.TypeVar("FC", t.Callable[..., t.Any], click.Command)
 
 
-pass_psycopg_connection = \
-    click.make_pass_decorator(psycopg.connection.Connection)
-
-
 @contextlib.contextmanager
 def may_not_exist_context():
     try:
         yield
-    except (
-            psycopg.errors.OperationalError,
-            sqlalchemy.exc.OperationalError,
-    ) as e:
+    except sqlalchemy.exc.OperationalError as e:
         if e.code != "e3q8":
             raise
         echo_error_as_warning(e)
-    except psycopg.errors.InvalidCatalogName as e:
+    except errors.lookup("3D000") as e:  # InvalidCatalogName
         echo_error_as_warning(e)
 
 
@@ -47,7 +41,7 @@ def may_not_exist_context():
 def may_already_exist_context():
     try:
         yield
-    except psycopg.errors.DuplicateDatabase as e:
+    except errors.lookup("42P04") as e:  # DuplicateDatabase
         echo_error_as_warning(e)
 
 
@@ -73,7 +67,7 @@ class ContextArgument(ContextMixin, click.Argument):
     pass
 
 
-def get_connection(ctx: click.Context, admin_uri: str) -> psycopg.Connection:
+def get_connection(ctx: click.Context, admin_uri: str) -> "psycopg.Connection":
     conn = psycopg.connect(admin_uri)
     conn.autocommit = True
     ctx.call_on_close(conn.close)
