@@ -127,7 +127,7 @@ For apps already setup to use Flask-SQLALchemy, all **Flask-Postgres** configura
 |---|---|---|
 |`FLASK_POSTGRES_CLI_DISALLOWED_ENVS` | `Sequence[str]` (or `str` delimited by `;`) | List of environments where the `flask psql` CLI is disabled from running.<br /><br />(Default behavior is the CLI is never disabled.)
 |`FLASK_POSTGRES_TARGET_DATABASE_URI` | `str` | URL for the Postgres database to be created / initialized / deleted.<br /><br />(Default behavior is to use `SQLALCHEMY_DATABASE_URI`.)
-|`FLASK_POSTGRES_ADMIN_DBNAME` | `str` | Database name to use when connecting to the Postgres server to create or delete another database.<br /><br />(Default behavior is to replace `{dbname}` with `postgres`.)
+|`FLASK_POSTGRES_ADMIN_DBNAME` | `str` | Database name to use when connecting to the Postgres server to create or delete another database.<br /><br />It's not recomended that you mess around with this unless you need to.<br /><br />(Default behavior is to replace `{dbname}` with `postgres`.)
 
 ### Database connection
 
@@ -158,11 +158,7 @@ For example, if your environment variable is `SQLALCHEMY_DATABASE_URI=foo`, and 
 
 ### CLI Options
 
-CLI options always override everything and work separately from the way that the config resolves variables:
-
-They also work in reverse of the config variables normally. Instead of defining a target database URI `postgresql://localhost:5432/mydb` and replacing the `-d` with `postgres`, instead you define the admin URI `postgresql://localhost:5432/postgres` which creates `mydb`.
-
-It is **not** recommended that you use the CLI options for setting config related variables.
+CLI options always override everything.
 
 ## Caveat
 
@@ -180,10 +176,10 @@ For serious production stuff, look into Docker Compose (to `create` your databas
 # Release notes
 
 - `0.2.0`: Broke the API in a few spots and made it more consistent.
-  - `dbname` is the commonly used variable name.
-  - Reorganized the config variables around.
-  - Lots of refactoring to expose database operations: `create_db` and `drop_db`.
-  - Added typo checking in the Click context.
-  - Added more options: `--force-disconnect` and `--overwrite`.
-  - Added more robust typing with `PostgresUri`. This builds and validates a Postgres URI, and provides helpful information to the user on why it's invalid. This is used both internally to make the code nicer + safer, and it's also as a `click.ParamType`.
+    - `dbname` is the commonly used variable name.
+    - Reorganized the config variables around.
+    - Lots of refactoring to expose database operations: `create_db` and `drop_db`.
+    - Added typo checking in the Click context.
+    - Added more options: `--force-disconnect` and `--overwrite`.
+    - Added more robust typing with `PostgresUri`. This builds and validates a Postgres URI, and provides helpful information to the user on why it's invalid. This is used both internally to make the code nicer + safer, and it's also as a `click.ParamType`.
 - `0.1.4`: First real release.

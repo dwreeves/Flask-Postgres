@@ -94,6 +94,21 @@ def overwrite_option(
     )
 
 
+def admin_dbname_option(**kwargs) -> t.Callable[[FC], FC]:
+    return click.option(
+        "--admin-dbname", "-a",
+        type=click.STRING,
+        default=lambda: config.get("FLASK_POSTGRES_ADMIN_DBNAME"),
+        # This one doesn't change too often. So we opt to eagarly load
+        # the config variable, rather than treating this as something
+        # that's "dynamic."
+        show_default=config.get("FLASK_POSTGRES_ADMIN_DBNAME"),
+        help="This is the admin database name to use when attempting to"
+             " create or drop a database. You probably do not need to"
+             " change this."
+    )
+
+
 def _resolve_extra_overwrite_params(
         ctx: click.Context,
         param: click.Parameter,
@@ -111,18 +126,8 @@ def _resolve_extra_overwrite_params(
 
 
 @click.group("psql", cls=FlaskPostgresGroup)
-@click.option("--admin-dbname", "-a",
-              type=click.STRING,
-              default=lambda: config.get("FLASK_POSTGRES_ADMIN_DBNAME"),
-              # This one doesn't change too often. So we opt to eagarly load
-              # the config variable, rather than treating this as something
-              # that's "dynamic."
-              show_default=config.get("FLASK_POSTGRES_ADMIN_DBNAME"),
-              help="This is the admin database name to use when attempting to"
-                   " create or delete a database. You probably do not need to"
-                   " change this.")
 @with_appcontext
-def cli(admin_dbname: t.Optional[str] = config.get("FLASK_POSTGRES_ADMIN_DBNAME")):
+def cli():
     """
     Manage your PostgreSQL database instance.
     """
@@ -135,6 +140,7 @@ cli: AppGroup
 
 @cli.command("create")
 @uri_option("created")
+@admin_dbname_option()
 @force_delete_option(hidden=True,
                      callback=_resolve_extra_overwrite_params)
 @force_disconnect_option("creating",
@@ -146,13 +152,14 @@ cli: AppGroup
 def create_db_command(
         ctx: click.Context,
         uri: PostgresUri,
+        admin_dbname: t.Optional[str] = config.get("FLASK_POSTGRES_ADMIN_DBNAME"),
         overwrite: bool = False,
         **kwargs
 ):
     """Create the database."""
     if overwrite:
         ctx.forward(drop_db_command)
-    admin_uri = uri.admin_uri(ctx.params.get("admin_dbname"))
+    admin_uri = uri.admin_uri(admin_dbname)
     conn = get_connection(ctx, admin_uri)
     return create_db(
         conn=conn,
@@ -183,6 +190,7 @@ init_db_command: click.Command
 
 @cli.command("drop")
 @uri_option("dropped")
+@admin_dbname_option()
 @force_delete_option()
 @force_disconnect_option("dropping")
 @with_appcontext
@@ -190,12 +198,13 @@ init_db_command: click.Command
 def drop_db_command(
         ctx: click.Context,
         uri: PostgresUri,
+        admin_dbname: t.Optional[str] = config.get("FLASK_POSTGRES_ADMIN_DBNAME"),
         force: bool = False,
         force_disconnect: bool = False,
         **kwargs
 ):
     """Delete the database."""
-    admin_uri = uri.admin_uri(ctx.params.get("admin_dbname"))
+    admin_uri = uri.admin_uri(admin_dbname)
     conn = get_connection(ctx, admin_uri)
     return drop_db(
         conn=conn,
@@ -211,6 +220,7 @@ drop_db_command: click.Command
 
 @cli.command("setup")
 @uri_option("setup")
+@admin_dbname_option()
 @force_delete_option(hidden=True,
                      callback=_resolve_extra_overwrite_params)
 @force_disconnect_option("setting up",
@@ -233,6 +243,7 @@ setup_db_command: click.Command
 
 @cli.command("reset")
 @uri_option("reset")
+@admin_dbname_option()
 @force_delete_option()
 @force_disconnect_option("resetting")
 @click.pass_context

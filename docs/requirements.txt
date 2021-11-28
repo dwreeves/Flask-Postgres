@@ -3,3 +3,4 @@ pymdown-extensions
 mkdocs-material
 mkdocs-macros-plugin
 pygments
+markdown-include
