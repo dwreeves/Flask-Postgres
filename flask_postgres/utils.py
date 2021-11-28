@@ -104,10 +104,11 @@ def database_exists(
     cursor = conn.cursor()
 
     try:
-        exists = bool(cursor.execute(
+        cursor.execute(
             "SELECT MAX((datname = %s)::int) FROM pg_database;",
             (database_name,)
-        ).fetchone()[0])
+        )
+        exists = bool(cursor.fetchone()[0])
     finally:
         cursor.close()
 
