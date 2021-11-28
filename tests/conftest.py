@@ -5,7 +5,7 @@ import sqlalchemy as sa
 
 from flask import Flask
 from flask_postgres._compat import psycopg  # noqa
-from flask_postgres.cli import cli
+from flask_postgres.cli.main import cli
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def db_params(uri) -> dict:
 @pytest.fixture(autouse=True)
 def clean_env(monkeypatch):
     monkeypatch.delitem(os.environ, "FLASK_POSTGRES_TARGET_DATABASE_URI", raising=False)
-    monkeypatch.delitem(os.environ, "FLASK_POSTGRES_ADMIN_PATH", raising=False)
+    monkeypatch.delitem(os.environ, "FLASK_POSTGRES_ADMIN_DBNAME", raising=False)
     monkeypatch.delitem(os.environ, "SQLALCHEMY_DATABASE_URI", raising=False)
     monkeypatch.delitem(os.environ, "FLASK_POSTGRES_CLI_DISALLOWED_ENVS", raising=False)
     yield
@@ -45,7 +45,7 @@ def base_app() -> Flask:
 
 
 @pytest.fixture(autouse=True)
-def admin_connection(db_params) -> psycopg.connection.Connection:
+def admin_connection(db_params) -> "psycopg.Connection":
     admin_params = db_params.copy()
     admin_params["dbname"] = "postgres"
     conn = psycopg.connect(**admin_params)
@@ -68,7 +68,8 @@ def uninitialized_database_janitor(db_params: dict):
     try:
         # Always attempt to drop the database!
         janitor.drop()
-    except psycopg.errors.InvalidCatalogName:
+    # except psycopg.errors.InvalidCatalogName:
+    except psycopg.errors.lookup("3D000"):
         pass
 
 

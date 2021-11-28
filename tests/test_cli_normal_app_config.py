@@ -4,9 +4,14 @@ import sqlalchemy as sa
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from flask_postgres.utils import database_exists
+from flask_postgres.ops import database_exists as _database_exists
 from flask_postgres import init_db_callback
 from flask_postgres.config import reset_init_db_callback
+
+
+def db_exists(conn, dbname):
+    with conn.cursor() as cursor:
+        return _database_exists(cursor, dbname)
 
 
 @pytest.fixture
@@ -56,14 +61,14 @@ def test_psql_create_command(
 ):
     dbname = db_params.get("dbname")
 
-    assert not database_exists(dbname, admin_connection)
+    assert not db_exists(admin_connection, dbname)
 
     client = typically_configured_app.test_cli_runner()
     res = client.invoke(typically_configured_app.cli, ["psql", "create"])
 
     assert res.exit_code == 0
     assert res.output == f'database "{dbname}" was created\n'
-    assert database_exists(dbname, admin_connection)
+    assert db_exists(admin_connection, dbname)
 
 
 def test_psql_init_command(
@@ -82,8 +87,8 @@ def test_psql_init_command(
     client = typically_configured_app.test_cli_runner()
     res = client.invoke(typically_configured_app.cli, ["psql", "init"])
 
-    assert res.exit_code == 0
-    assert res.output == f'database "{dbname}" was initialized\n'
+    assert res.exit_code == 0, res.output
+    assert res.output == f'database "{dbname}" was initialized\n', res.output
 
     with typically_configured_app.app_context():
         db_inspector = sa.inspect(db.engine)
@@ -103,13 +108,13 @@ def test_psql_init_command_when_db_not_created(
 ):
     dbname = db_params.get("dbname")
 
-    assert not database_exists(dbname, admin_connection)
+    assert not db_exists(admin_connection, dbname)
 
     client = typically_configured_app.test_cli_runner()
     res = client.invoke(typically_configured_app.cli, ["psql", "init"])
 
     assert res.output == f'database "{dbname}" does not exist\n', res.output
-    assert not database_exists(dbname, admin_connection)
+    assert not db_exists(admin_connection, dbname)
 
 
 def test_psql_init_command_with_custom_callback(
@@ -156,7 +161,7 @@ def test_psql_drop_command(
 ):
     dbname = db_params.get("dbname")
 
-    assert database_exists(dbname, admin_connection)
+    assert db_exists(admin_connection, dbname)
 
     if cli_test_conf.type_in_db_name:
         input_stream = dbname
@@ -170,7 +175,7 @@ def test_psql_drop_command(
         input=input_stream
     )
 
-    assert res.exit_code == 0
+    assert res.exit_code == 0, res.output
 
     if cli_test_conf.type_in_db_name:
         assert res.output.startswith("Are you sure"), res.output
@@ -178,7 +183,7 @@ def test_psql_drop_command(
     else:
         assert res.output == f'database "{dbname}" was deleted\n', res.output
 
-    assert not database_exists(dbname, admin_connection)
+    assert not db_exists(admin_connection, dbname)
 
 
 def test_psql_drop_command_wont_delete_on_typo(
@@ -186,12 +191,13 @@ def test_psql_drop_command_wont_delete_on_typo(
         typically_configured_app: Flask,
         activated_database,
         db_params: dict,
+        uri: str,
 ):
     dbname = db_params.get("dbname")
 
-    assert database_exists(dbname, admin_connection)
+    assert db_exists(admin_connection, dbname)
 
-    input_stream = dbname + "extratext"
+    input_stream = uri + "extratext"
 
     client = typically_configured_app.test_cli_runner()
     res = client.invoke(
@@ -206,7 +212,7 @@ def test_psql_drop_command_wont_delete_on_typo(
     assert f'\ndatabase "{dbname}" was deleted\n' not in res.output, res.output
     assert f'database "{dbname}" will not be deleted' in res.output, res.output
 
-    assert database_exists(dbname, admin_connection)
+    assert db_exists(admin_connection, dbname)
 
 
 def test_psql_setup_command(
@@ -218,7 +224,7 @@ def test_psql_setup_command(
 ):
     dbname = db_params.get("dbname")
 
-    assert not database_exists(dbname, admin_connection)
+    assert not db_exists(admin_connection, dbname)
 
     client = typically_configured_app.test_cli_runner()
     res = client.invoke(typically_configured_app.cli, ["psql", "setup"])
@@ -229,7 +235,7 @@ def test_psql_setup_command(
         f'database "{dbname}" was initialized\n'
     ), res.output
 
-    assert database_exists(dbname, admin_connection)
+    assert db_exists(admin_connection, dbname)
 
     with typically_configured_app.app_context():
         first_row_of_data = db.session.query(example_model).first()
@@ -246,7 +252,7 @@ def test_psql_setup_command_with_custom_callback(
 ):
     dbname = db_params.get("dbname")
 
-    assert not database_exists(dbname, admin_connection)
+    assert not db_exists(admin_connection, dbname)
 
     client = typically_configured_app.test_cli_runner()
     res = client.invoke(typically_configured_app.cli, ["psql", "setup"])
@@ -257,7 +263,7 @@ def test_psql_setup_command_with_custom_callback(
         f'database "{dbname}" was initialized\n'
     ), res.output
 
-    assert database_exists(dbname, admin_connection)
+    assert db_exists(admin_connection, dbname)
 
     with typically_configured_app.app_context():
         first_row_of_data = db.session.query(example_model).first()
@@ -274,7 +280,7 @@ def test_psql_setup_command_when_db_exists(
 ):
     dbname = db_params.get("dbname")
 
-    assert database_exists(dbname, admin_connection)
+    assert db_exists(admin_connection, dbname)
 
     with typically_configured_app.app_context():
         db_inspector = sa.inspect(db.engine)
@@ -289,7 +295,7 @@ def test_psql_setup_command_when_db_exists(
         f'database "{dbname}" was initialized\n'
     ), res.output
 
-    assert database_exists(dbname, admin_connection)
+    assert db_exists(admin_connection, dbname)
 
     with typically_configured_app.app_context():
         db_inspector = sa.inspect(db.engine)
@@ -310,19 +316,19 @@ def test_psql_reset_command(
 ):
     dbname = db_params.get("dbname")
 
-    assert database_exists(dbname, admin_connection)
+    assert db_exists(admin_connection, dbname)
 
     client = typically_configured_app.test_cli_runner()
     res = client.invoke(typically_configured_app.cli, ["psql", "reset", "-f"])
 
-    assert res.exit_code == 0
+    assert res.exit_code == 0, res.output
     assert res.output == (
         f'database "{dbname}" was deleted\n'
         f'database "{dbname}" was created\n'
         f'database "{dbname}" was initialized\n'
-    )
+    ), res.output
 
-    assert database_exists(dbname, admin_connection)
+    assert db_exists(admin_connection, dbname)
 
     with typically_configured_app.app_context():
         db_inspector = sa.inspect(db.engine)

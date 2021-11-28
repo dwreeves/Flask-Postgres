@@ -1,7 +1,7 @@
 .PHONY: install
 install:
 	pip install flit
-	flit install --deps develop
+	flit install --deps develop --symlink
 
 .PHONY: build
 build:
