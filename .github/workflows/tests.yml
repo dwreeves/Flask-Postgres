@@ -1,0 +1,56 @@
+name: tests
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [3.6.x, 3.7.x, 3.8.x, 3.9.x, 3.10.x]
+        flask: [2.*]
+        click: [7.*, 8.*]
+        psycopg: [psycopg2]
+        # flask: [1.*, 2.*]
+        # click: [6.*, 7.*, 8.*]
+        # psycopg: [psycopg, psycopg2]
+    services:
+      postgres:
+        image: postgres:12-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+        architecture: x64
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install python-dev libpq-dev
+        pip install --upgrade pip
+        make install
+        pip install --upgrade flask=="${FLASK_VERSION}"
+        pip install --upgrade click=="${CLICK_VERSION}"
+        pip install "${PSYCOPG_PACKAGE}"
+      env:
+        FLASK_VERSION: ${{ matrix.flask }}
+        CLICK_VERSION: ${{ matrix.click }}
+        PSYCOPG_PACKAGE: ${{ matrix.psycopg }}
+    - name: Run tests
+      run: make test
+      env:
+        TEST_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/flask_postgres_test_database

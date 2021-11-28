@@ -1,0 +1,35 @@
+site_name: Flask-Postgres
+site_url: https://dwreeves.github.io/flask_postgres/
+#site_description:
+site_author: Daniel Reeves
+repo_url: https://github.com/dwreeves/flask_postgres
+repo_name: Flask-Postgres
+docs_dir: src/
+nav:
+- Home: pages/index.md
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: black
+    accent: light blue
+  logo: img/flask-postgres-logo.png
+  favicon: img/flask-postgres-logo-small.png
+  font:
+    text: Opens Sans
+    code: Roboto Mono
+plugins:
+  - macros
+markdown_extensions:
+- admonition
+- pymdownx.tabbed # https://facelessuser.github.io/pymdown-extensions/
+- pymdownx.keys
+- pymdownx.details
+- pymdownx.inlinehilite
+- sane_lists
+extra:
+  social:
+  - icon: fontawesome/brands/github
+    link: https://github.com/dwreeves
+  - icon: fontawesome/brands/linkedin
+    link: https://www.linkedin.com/in/daniel-reeves-27700545/

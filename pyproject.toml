@@ -1,0 +1,52 @@
+[build-system]
+requires = ["flit_core >=2,<3"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "flask_postgres"
+home-page = "https://github.com/dwreeves/flask-postgres"
+license = "MIT"
+author = "Daniel Reeves"
+author-email = "xdanielreeves@gmail.com"
+description-file = "README.md"
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Flask",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Database"
+]
+requires = [
+    "Flask>=1.0",
+    "Click>=7.0",
+    "SQLAlchemy>=1.2.2",
+    "Flask-SQLAlchemy>=2.4",
+]
+requires-python = ">=3.6"
+
+[tool.flit.metadata.requires-extra]
+test = [
+    "psycopg",
+    "pytest>=6.0.1",
+    "pytest-cov",
+    "pytest-postgresql",
+]
+doc = [
+    "mkdocs",
+    "pymdown-extensions",
+    "mkdocs-material",
+    "mkdocs-macros-plugin",
+    "pygments"
+]
+
+[options.entry_points."flask.commands"]
+psql = "flask_postgres.cli:cli"
+
+[tool.pytest.ini_options]
+addopts = "-v --cov=flask_postgres"
+testpaths = ["tests"]
