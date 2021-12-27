@@ -21,6 +21,13 @@ typical_config = AdminUriTestConf(
     expected_admin_uri="postgresql://foo:bar@hello:12345/postgres"
 )
 
+typical_config_w_extended_scheme = AdminUriTestConf(
+    app_config={
+        "SQLALCHEMY_DATABASE_URI": "postgresql+psycopg://foo:bar@hello:12345/world"
+    },
+    expected_admin_uri="postgresql+psycopg://foo:bar@hello:12345/postgres"
+)
+
 typical_config_w_custom_admin = AdminUriTestConf(
     app_config={
         "SQLALCHEMY_DATABASE_URI": "postgresql://foo:bar@hello:12345/world",
@@ -78,6 +85,7 @@ config_with_env_var_that_overrules_sqla_uri = AdminUriTestConf(
 @pytest.mark.parametrize(
     "conf", [
         typical_config,
+        typical_config_w_extended_scheme,
         typical_config_w_custom_admin,
         typical_config_w_custom_admin_w_forward_slash,
         config_with_env_var,
