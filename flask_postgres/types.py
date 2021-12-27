@@ -9,7 +9,7 @@ from flask_postgres.exceptions import UriValidationError
 
 
 _db_regex = re.compile(
-    r'(?:(?P<scheme>[a-z][a-z0-9+\-.]+)://)?'
+    r'(?:(?P<scheme>[a-z][a-z0-9+\-.]+(?:\+[a-z0-9+\-.]+)?)://)?'
     r'(?:(?P<user>[^\s:/]*)'
     r'(?::(?P<password>[^\s/]*))?@)?'
     r'(?P<host>[^\s/:?#]+)'
@@ -156,7 +156,7 @@ class PostgresUri(str):
                 value=uri,
                 issue=f"The URI does not contain a database name."
             )
-        if scheme not in cls._validation_config["allowed_schemes"]:
+        if scheme.split("+")[0] not in cls._validation_config["allowed_schemes"]:
             raise UriValidationError(
                 value=uri,
                 issue=f"Scheme {scheme!r} not in"
