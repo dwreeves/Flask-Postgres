@@ -26,7 +26,8 @@ DEFAULT_CONFIG: t.Dict[str, t.Callable[[], t.Any]] = {
     "FLASK_POSTGRES_CLI_DISALLOWED_ENVS": lambda: set(),
     "FLASK_POSTGRES_TARGET_DATABASE_URI": _target_database_uri_default,
     "FLASK_POSTGRES_ADMIN_DBNAME": lambda: "postgres",
-    "FLASK_POSTGRES_DATABASE_TEMPLATE": lambda: None
+    "FLASK_POSTGRES_DATABASE_TEMPLATE": lambda: None,
+    "FLASK_POSTGRES_RICH_CLICK": lambda: False,
 }
 
 

@@ -164,7 +164,8 @@ def create_db_command(
     return create_db(
         conn=conn,
         dbname=uri.dbname,
-        command_line_mode=True
+        command_line_mode=True,
+        template=config.get("FLASK_POSTGRES_DATABASE_TEMPLATE")
     )
 
 

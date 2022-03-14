@@ -128,6 +128,8 @@ For apps already setup to use Flask-SQLALchemy, all **Flask-Postgres** configura
 |`FLASK_POSTGRES_CLI_DISALLOWED_ENVS` | `Sequence[str]` (or `str` delimited by `;`) | List of environments where the `flask psql` CLI is disabled from running.<br /><br />(Default behavior is the CLI is never disabled.)
 |`FLASK_POSTGRES_TARGET_DATABASE_URI` | `str` | URL for the Postgres database to be created / initialized / deleted.<br /><br />(Default behavior is to use `SQLALCHEMY_DATABASE_URI`.)
 |`FLASK_POSTGRES_ADMIN_DBNAME` | `str` | Database name to use when connecting to the Postgres server to create or delete another database.<br /><br />It's not recomended that you mess around with this unless you need to.<br /><br />(Default behavior is to replace `{dbname}` with `postgres`.)
+|`FLASK_POSTGRES_DATABASE_TEMPLATE` | `str` | Name of the Postgres database template to use when creating the database.<br /><br />(Default behavior is to not use a custom template at all.)
+|`FLASK_POSTGRES_RICH_CLICK` | `bool` | If true, then use [Rich-Click](https://github.com/ewels/rich-click/) to format `--help`.<br /><br />(Default behavior is `False`, i.e. to not use Rich-Click.)
 
 ### Database connection
 
