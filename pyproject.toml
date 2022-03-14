@@ -32,7 +32,7 @@ requires-python = ">=3.6"
 [tool.flit.metadata.requires-extra]
 test = [
     "psycopg",
-    "pytest>=6.0.1",
+    "pytest>=6.0.1,<7a0",
     "pytest-cov",
     "pytest-postgresql",
 ]
@@ -42,6 +42,10 @@ doc = [
     "mkdocs-material",
     "mkdocs-macros-plugin",
     "pygments"
+]
+rich = [
+    "rich",
+    "rich-click"
 ]
 
 [tool.flit.entrypoints."flask.commands"]

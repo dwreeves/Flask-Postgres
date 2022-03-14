@@ -7,6 +7,27 @@ from flask.cli import AppGroup
 
 from flask_postgres.types import PostgresUri
 
+try:
+    import rich_click
+except ImportError:
+    rich_click = None
+
+from flask_postgres import config
+
+
+__use_rich_click = config.get("FLASK_POSTGRES_RICH_CLICK")
+
+if isinstance(__use_rich_click, str):
+    __use_rich_click = __use_rich_click.lower() in ["1", "true", "yes", "y"]
+
+if __use_rich_click and rich_click is None:
+    import warnings
+    warnings.warn("`FLASK_POSTGRES_RICH_CLICK` is set to True,"
+                  " but Rich-Click is not installed."
+                  " Defaulting to not using Rich-Click",
+                  UserWarning)
+    __use_rich_click = False
+
 
 class ContextMixin(click.Parameter):
 
@@ -56,5 +77,14 @@ class ContextWithTypoSuggestions(click.Context):
         return super().fail(message, *args, **kwargs)  # noqa
 
 
-class FlaskPostgresGroup(AppGroup):
-    context_class = ContextWithTypoSuggestions
+if __use_rich_click:
+
+    class FlaskPostgresGroup(rich_click.RichGroup, AppGroup):
+        context_class = ContextWithTypoSuggestions
+        command_class = rich_click.RichCommand
+        group_class = rich_click.RichGroup
+
+else:
+
+    class FlaskPostgresGroup(AppGroup):
+        context_class = ContextWithTypoSuggestions
