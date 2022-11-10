@@ -54,6 +54,7 @@ capsys
     assert "app" in inspect.signature(new_func).parameters
     assert "db" in inspect.signature(new_func).parameters
 
+    base_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db/"
     db = SQLAlchemy(base_app)
 
     assert capsys.readouterr().out == ""
@@ -72,6 +73,7 @@ def test_get_db_function(base_app):
             get_db()
 
     # This works perfectly fine.
+    base_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db/"
     db1 = SQLAlchemy(base_app)
     with base_app.app_context():
         db2 = get_db()

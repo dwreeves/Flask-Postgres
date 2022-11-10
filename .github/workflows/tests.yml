@@ -11,13 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [3.6.x, 3.7.x, 3.8.x, 3.9.x, 3.10.x]
-        flask: [2.*]
+        python: [3.6.x, 3.7.x, 3.8.x, 3.9.x, 3.10.x, 3.11.x]
+        flask: [2.0.*, 2.*]
         click: [7.*, 8.*]
         psycopg: [psycopg2]
-        # flask: [1.*, 2.*]
-        # click: [6.*, 7.*, 8.*]
-        # psycopg: [psycopg, psycopg2]
+        flask-sqlalchemy: [2.*, 3.*]
+        exclude:
+          - flask: 2.*
+            flask-sqlalchemy: 3.*
+          - python: 3.6.x
+            flask-sqlalchemy: 3.*
+          - flask: 2.*
+            click: 7.*
+          - python: 3.6.x
+            flask: 2.*
     services:
       postgres:
         image: postgres:12-alpine
@@ -45,9 +52,11 @@ jobs:
         make install
         pip install --upgrade flask=="${FLASK_VERSION}"
         pip install --upgrade click=="${CLICK_VERSION}"
+        pip install --upgrade flask-sqlalchemy=="${FLASK_SQLALCHEMY_VERSION}"
         pip install "${PSYCOPG_PACKAGE}"
       env:
         FLASK_VERSION: ${{ matrix.flask }}
+        FLASK_SQLALCHEMY_VERSION: ${{ matrix.flask-sqlalchemy }}
         CLICK_VERSION: ${{ matrix.click }}
         PSYCOPG_PACKAGE: ${{ matrix.psycopg }}
     - name: Run tests
