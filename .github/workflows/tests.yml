@@ -11,13 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [3.6.x, 3.7.x, 3.8.x, 3.9.x, 3.10.x]
+        python: [3.6.x, 3.7.x, 3.8.x, 3.9.x, 3.10.x, 3.11.x]
         flask: [2.*]
         click: [7.*, 8.*]
         psycopg: [psycopg2]
-        # flask: [1.*, 2.*]
-        # click: [6.*, 7.*, 8.*]
-        # psycopg: [psycopg, psycopg2]
     services:
       postgres:
         image: postgres:12-alpine
