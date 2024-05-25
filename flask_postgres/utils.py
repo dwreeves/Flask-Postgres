@@ -30,7 +30,11 @@ def get_db() -> SQLAlchemy:
         raise RuntimeError("The app context is currently not active.")
     if "sqlalchemy" not in current_app.extensions:
         raise SqlaExtensionNotFound
-    return current_app.extensions["sqlalchemy"].db
+    if hasattr(current_app.extensions["sqlalchemy"], "db"):
+        db = current_app.extensions["sqlalchemy"].db
+    else:
+        db = current_app.extensions["sqlalchemy"]
+    return db
 
 
 def raise_err_if_disallowed():
@@ -44,7 +48,13 @@ def raise_err_if_disallowed():
     li = config.get("FLASK_POSTGRES_CLI_DISALLOWED_ENVS")
     if isinstance(li, str):
         li = li.split(";")
-    if current_app.env in li:
+    if li is None:
+        return
+    if hasattr(current_app, "env"):
+        app_env = current_app.env
+    else:
+        app_env = current_app.config.get("FLASK_ENV")
+    if app_env in li:
         raise EnvironmentNotAllowed
 
 
