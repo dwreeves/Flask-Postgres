@@ -1,5 +1,6 @@
 .PHONY: install
 install:
+	# Deprecated; using uv instead.
 	pip install flit
 	flit install --deps develop --symlink
 

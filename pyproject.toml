@@ -22,16 +22,16 @@ classifiers = [
     "Topic :: Database"
 ]
 requires = [
-    "Flask>=1.0",
+    "Flask>=2.0",
     "Click>=7.0",
-    "SQLAlchemy>=1.2.2",
+    "SQLAlchemy>=1.4.0",
     "Flask-SQLAlchemy>=2.4",
 ]
 requires-python = ">=3.7"
 
 [tool.flit.metadata.requires-extra]
 test = [
-    "psycopg",
+    # "psycopg2",
     "pytest>=6.0.1,<7a0",
     "pytest-cov",
     "pytest-postgresql",
