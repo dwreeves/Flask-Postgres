@@ -63,10 +63,10 @@ def test_psql_create_command(
 
     assert not db_exists(admin_connection, dbname)
 
-    client = typically_configured_app.test_cli_runner()
-    res = client.invoke(typically_configured_app.cli, ["psql", "create"])
+    client = typically_configured_app.test_cli_runner(mix_stderr=True)
+    res: Result = client.invoke(typically_configured_app.cli, ["psql", "create"])
 
-    assert res.exit_code == 0
+    assert res.exit_code == 0, res.output
     assert res.output == f'database "{dbname}" was created\n'
     assert db_exists(admin_connection, dbname)
 
@@ -84,7 +84,7 @@ def test_psql_init_command(
         db_inspector = sa.inspect(db.engine)
         assert not db_inspector.has_table("pet")
 
-    client = typically_configured_app.test_cli_runner()
+    client = typically_configured_app.test_cli_runner(mix_stderr=True)
     res = client.invoke(typically_configured_app.cli, ["psql", "init"])
 
     assert res.exit_code == 0, res.output
@@ -110,7 +110,7 @@ def test_psql_init_command_when_db_not_created(
 
     assert not db_exists(admin_connection, dbname)
 
-    client = typically_configured_app.test_cli_runner()
+    client = typically_configured_app.test_cli_runner(mix_stderr=True)
     res = client.invoke(typically_configured_app.cli, ["psql", "init"])
 
     assert res.output == f'database "{dbname}" does not exist\n', res.output
@@ -127,7 +127,7 @@ def test_psql_init_command_with_custom_callback(
 ):
     dbname = db_params.get("dbname")
 
-    client = typically_configured_app.test_cli_runner()
+    client = typically_configured_app.test_cli_runner(mix_stderr=True)
     res = client.invoke(typically_configured_app.cli, ["psql", "init"])
 
     assert res.exit_code == 0, res.output
@@ -168,7 +168,7 @@ def test_psql_drop_command(
     else:
         input_stream = None
 
-    client = typically_configured_app.test_cli_runner()
+    client = typically_configured_app.test_cli_runner(mix_stderr=True)
     res = client.invoke(
         typically_configured_app.cli,
         ["psql", "drop", *cli_test_conf.options],
@@ -199,7 +199,7 @@ def test_psql_drop_command_wont_delete_on_typo(
 
     input_stream = uri + "extratext"
 
-    client = typically_configured_app.test_cli_runner()
+    client = typically_configured_app.test_cli_runner(mix_stderr=True)
     res = client.invoke(
         typically_configured_app.cli,
         ["psql", "drop"],
@@ -226,7 +226,7 @@ def test_psql_setup_command(
 
     assert not db_exists(admin_connection, dbname)
 
-    client = typically_configured_app.test_cli_runner()
+    client = typically_configured_app.test_cli_runner(mix_stderr=True)
     res = client.invoke(typically_configured_app.cli, ["psql", "setup"])
 
     assert res.exit_code == 0, res.output
@@ -254,7 +254,7 @@ def test_psql_setup_command_with_custom_callback(
 
     assert not db_exists(admin_connection, dbname)
 
-    client = typically_configured_app.test_cli_runner()
+    client = typically_configured_app.test_cli_runner(mix_stderr=True)
     res = client.invoke(typically_configured_app.cli, ["psql", "setup"])
 
     assert res.exit_code == 0, res.output
@@ -286,7 +286,7 @@ def test_psql_setup_command_when_db_exists(
         db_inspector = sa.inspect(db.engine)
         assert not db_inspector.has_table("pet")
 
-    client = typically_configured_app.test_cli_runner()
+    client = typically_configured_app.test_cli_runner(mix_stderr=True)
     res = client.invoke(typically_configured_app.cli, ["psql", "setup"])
 
     assert res.exit_code == 0, res.output
@@ -318,7 +318,7 @@ def test_psql_reset_command(
 
     assert db_exists(admin_connection, dbname)
 
-    client = typically_configured_app.test_cli_runner()
+    client = typically_configured_app.test_cli_runner(mix_stderr=True)
     res = client.invoke(typically_configured_app.cli, ["psql", "reset", "-f"])
 
     assert res.exit_code == 0, res.output

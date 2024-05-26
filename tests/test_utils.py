@@ -10,6 +10,12 @@ from flask_postgres.utils import raise_err_if_disallowed
 from flask_postgres.exceptions import SqlaExtensionNotFound
 from flask_postgres.exceptions import EnvironmentNotAllowed
 
+try:
+    from importlib import metadata  # type: ignore[import,unused-ignore]
+except ImportError:
+    # Python < 3.8
+    import importlib_metadata as metadata  # type: ignore[no-redef,import-not-found]
+
 
 def test_database_exists_function(
         admin_connection,
@@ -84,6 +90,13 @@ def test_get_db_function(base_app):
         get_db()
 
 
+major, minor, *_ = metadata.version("flask").split(".")
+
+# ≤ 2.2 only
+@pytest.mark.skipif(
+    condition=not (3 > int(major) >= 2 and 3 > int(minor) >= 0),
+    reason="app.env is deprecated in Flask 2.3.0+"
+)
 def test_raise_err_if_disallowed_function(base_app):
     # Nothing should happen
     with base_app.app_context():
