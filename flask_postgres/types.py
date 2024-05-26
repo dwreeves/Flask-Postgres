@@ -9,7 +9,7 @@ from flask_postgres.exceptions import UriValidationError
 
 
 _db_regex = re.compile(
-    r'(?:(?P<scheme>[a-z][a-z0-9+\-.]+(?:\+[a-z0-9+\-.]+)?)://)?'
+    r'(?:(?P<scheme>[a-z][a-z0-9\-.]+)(?:\+(?P<driver>[a-z0-9+\-.]+))?://)?'
     r'(?:(?P<user>[^\s:/]*)'
     r'(?::(?P<password>[^\s/]*))?@)?'
     r'(?P<host>[^\s/:?#]+)'
@@ -21,6 +21,7 @@ _db_regex = re.compile(
 
 class _PsqlUriParts(t.NamedTuple):
     scheme: str
+    driver: t.Optional[str]
     user: t.Optional[str]
     password: t.Optional[str]
     host: str
@@ -44,6 +45,7 @@ class PostgresUri(str):
             uri: t.Optional[str] = None,
             *,
             scheme: str = "postgresql",
+            driver: t.Optional[str] = "postgresql",
             user: t.Optional[str] = None,
             password: t.Optional[str] = None,
             host: str = "localhost",
@@ -53,6 +55,7 @@ class PostgresUri(str):
         if uri is None:
             self.build(
                 scheme=scheme,
+                driver=driver,
                 user=user,
                 password=password,
                 host=host,
@@ -60,10 +63,11 @@ class PostgresUri(str):
                 dbname=dbname
             )
         else:
-            scheme, user, password, host, port, dbname = \
+            scheme, driver, user, password, host, port, dbname = \
                 self._parts_from_str(uri)
         str.__init__(uri)
         self.scheme = scheme
+        self.driver = driver
         self.user = user
         self.password = password
         self.host = host
@@ -73,6 +77,7 @@ class PostgresUri(str):
             self.validate(
                 uri=uri,
                 scheme=scheme,
+                driver=driver,
                 user=user,
                 password=password,
                 host=host,
@@ -108,6 +113,7 @@ class PostgresUri(str):
             )
         return _PsqlUriParts(
             scheme=match_obj.group("scheme"),
+            driver=match_obj.group("driver"),
             user=match_obj.group("user"),
             password=match_obj.group("password"),
             host=match_obj.group("host"),
@@ -117,16 +123,20 @@ class PostgresUri(str):
 
     @classmethod
     def build(
-        cls,
-        *,
-        scheme: str = "postgresql",
-        user: t.Optional[str] = None,
-        password: t.Optional[str] = None,
-        host: str = "localhost",
-        port: t.Optional[t.Union[str, int]] = 5432,
-        dbname: str,
+            cls,
+            *,
+            scheme: str = "postgresql",
+            driver: t.Optional[str] = None,
+            user: t.Optional[str] = None,
+            password: t.Optional[str] = None,
+            host: str = "localhost",
+            port: t.Optional[t.Union[str, int]] = 5432,
+            dbname: str,
     ) -> str:
-        uri = f"{scheme}://"
+        uri = scheme
+        if driver is not None:
+            uri += f"+{driver}"
+        uri += "://"
         if user is not None:
             uri += user
         if password is not None:
@@ -145,6 +155,7 @@ class PostgresUri(str):
             uri: str,
             *,
             scheme: str = "postgresql",
+            driver: t.Optional[str] = None,
             user: t.Optional[str] = None,
             password: t.Optional[str] = None,
             host: str = "localhost",
@@ -186,6 +197,9 @@ class PostgresUri(str):
 
     def dict(self) -> t.Dict[str, t.Optional[t.Union[str, int]]]:
         return {i: getattr(self, i) for i in self.__slots__}
+
+    def connection_dict(self) -> t.Dict[str, t.Optional[t.Union[str, int]]]:
+        return {k: v for k, v in self.dict().items() if k in {"dbname", "user", "password", "host", "port"}}
 
     def admin_uri(self, dbname: t.Optional[str] = None) -> "PostgresUri":
         d = self.dict()

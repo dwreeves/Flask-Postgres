@@ -93,7 +93,10 @@ def test_get_db_function(base_app):
 major, minor, *_ = metadata.version("flask").split(".")
 
 # ≤ 2.2 only
-@pytest.mark.skipif(condition=(3 > int(major) >= 2 and 3 > int(minor) >= 0))
+@pytest.mark.skipif(
+    condition=not (3 > int(major) >= 2 and 3 > int(minor) >= 0),
+    reason="app.env is deprecated in Flask 2.3.0+"
+)
 def test_raise_err_if_disallowed_function(base_app):
     # Nothing should happen
     with base_app.app_context():

@@ -27,9 +27,9 @@ FC = t.TypeVar("FC", t.Callable[..., t.Any], click.Command)
 
 def get_connection(
         ctx: click.Context,
-        uri: str
+        uri: dict
 ) -> "psycopg.Connection":
-    conn = psycopg.connect(uri)
+    conn = psycopg.connect(**uri)
     conn.autocommit = True
     ctx.call_on_close(conn.close)
     return conn
@@ -160,7 +160,7 @@ def create_db_command(
     if overwrite:
         ctx.forward(drop_db_command)
     admin_uri = uri.admin_uri(admin_dbname)
-    conn = get_connection(ctx, admin_uri)
+    conn = get_connection(ctx, admin_uri.connection_dict())
     return create_db(
         conn=conn,
         dbname=uri.dbname,
@@ -206,7 +206,7 @@ def drop_db_command(
 ):
     """Delete the database."""
     admin_uri = uri.admin_uri(admin_dbname)
-    conn = get_connection(ctx, admin_uri)
+    conn = get_connection(ctx, admin_uri.connection_dict())
     return drop_db(
         conn=conn,
         dbname=uri.dbname,
