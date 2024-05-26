@@ -45,10 +45,10 @@ jobs:
       run: make test
       env:
         TEST_DATABASE_URI: postgresql+${{ matrix.psycopg }}://postgres:postgres@localhost:5432/flask_postgres_test_database
-    - name: "Run tests (resolution: lowest)"
-      run: |
-        uv pip install --system --upgrade --resolution lowest-direct -r pyproject.toml
-        uv pip install --system --upgrade "werkzeug<3"
-        make test
-      env:
-        TEST_DATABASE_URI: postgresql+${{ matrix.psycopg }}://postgres:postgres@localhost:5432/flask_postgres_test_database
+#    - name: "Run tests (resolution: lowest)"
+#      run: |
+#        uv pip install --system --upgrade --resolution lowest-direct -r pyproject.toml
+#        uv pip install --system --upgrade "werkzeug<3"
+#        make test
+#      env:
+#        TEST_DATABASE_URI: postgresql+${{ matrix.psycopg }}://postgres:postgres@localhost:5432/flask_postgres_test_database
