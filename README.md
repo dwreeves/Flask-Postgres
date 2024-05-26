@@ -1,3 +1,17 @@
+> [!WARNING]  
+> **This project is no longer supported.**
+> 
+> This was a weekend side project I made back in 2021. I updated it in 2024 so that it should work with **Flask 3** and **Flask-SQLAlchemy 3**. I cannot make any guarantees that it works for Flask versions later than that. I do not ever intend on maintaining this going forward.
+>
+> If you would like to create and drop databases, you have a few options:
+>
+> - For local dev: Docker + Docker Compose
+> - For unit-tests: Docker + Docker Compose, or `devcontainers`, or [pytest-postgresql](https://github.com/ClearcodeHQ/pytest-postgresql)
+>
+> For database initialization, use a migration framework such as Alembic, Flyway, Liquibase, etc.
+
+---
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/dwreeves/Flask-Postgres/main/docs/src/img/flask-postgres-banner.png">
 </p>
@@ -177,6 +191,10 @@ For serious production stuff, look into Docker Compose (to `create` your databas
 
 # Release notes
 
+- `0.2.5`:
+  - **⚠️ Project is no longer supported! This is the final version I intend on ever releasing.**
+  - Add support for Flask 3 and Flask-SQLAlchemy 3.
+  - Add `FLASK_POSTGRES_DATABASE_TEMPLATE` and `FLASK_POSTGRES_RICH_CLICK` options.
 - `0.2.0`: Broke the API in a few spots and made it more consistent.
     - `dbname` is the commonly used variable name.
     - Reorganized the config variables around.
